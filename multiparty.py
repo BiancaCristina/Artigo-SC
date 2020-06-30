@@ -43,7 +43,42 @@ def function_or(a,b):
 def function_greater(a,b):
     return (a==1) and (b==0)
 
+# Bit commitment
+# Escolha de esquema: QRS
+# R_m(b) == Z*_n
+# R_m(b) -> simplifiquei pra R_m
+# Z*_n -> simplifiquei pra Z* 
+# f: R_m -> Sm 
+# Sm = {x pertence a Z* tal que x/N = 1 (Quadratic NonResidue...)}
+# b: bit 
+# m: escolhido por A (m é o parâmetro de segurança)
+# r: é escolhido unif. de Z* (R_m)
+def getF_m(b,r,N):
+    return (((-1)**b)*(r**2))%N
 
+def getPrime(m):
+    p = R.getrandbits(m)
+
+    while True:
+        p = R.getrandbits(m)
+        
+        if (p%4 != 3 and isPrime(p) and p != 0): 
+            break   
+            
+    return p
+
+def isPrime(p):
+    if p == 1: return False
+    elif p <= 3: return True 
+    
+    else:
+        limit = int(p**(1/2)) + 2
+        
+        for i in range(2, limit):
+            if (p%i == 0): return False
+    
+    return True
+# Fim bit commitment
     
 for teste in range(1000):
     #Tabela Verdade
@@ -74,8 +109,19 @@ for teste in range(1000):
     dA = encryptionOutCol(TT,2,3)
     
     #1.4 Commit
-    # Falta....
+    # 
+    m = 4   # Escolha de A
+    r = 11  # Escolha arbitrária (deveria vir de um algoritmo uniforme)
+    p = getPrime(m)  
+    q = getPrime(m)
+    N = p*q
 
+    bA1_commit = getF_m(bA1, r, N)
+    bA3_commit = getF_m(bA3, r, N)
+    dA_commit = []
+
+    for bit in dA:
+        dA_commit.append(getF_m(bit, r, N))     
 
     #A envia para B pelo SC....
     
