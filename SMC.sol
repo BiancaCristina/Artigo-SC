@@ -23,6 +23,11 @@ contract SMC {
   }
 
   function receivesTableFromB(bool[12] memory _tt) public {
+	  for (uint i=0; i<4; i++) {
+		  for(uint j=0; j<3;j++) {
+			  TruthTableB[i][j] = _tt[i*3+j]
+		  }
+	  }
   }
 
   function receivesLinesFromA(uint l1, uint l2) public {
