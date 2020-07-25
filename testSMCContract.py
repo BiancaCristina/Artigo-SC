@@ -56,17 +56,35 @@ def main():
 
     # escolhe a funcao 
     f = function_and
+
+    
     #inicializa a tabela
     for l in TT:
         l[2] = f(l[0],l[1])
 
+    print('TT:',TT)
+    
+    #escolhas
+    escolhaA = bool(R.getrandbits(1))
+    escolhaB = bool(R.getrandbits(1))
+
+    print('Escolha de A:',escolhaA)
+    print('Escolha de B:',escolhaB)
+    
     # 1.1    
     (TTA,shuffleA) = shuffle(TT)
+    
+    print('Antes:',TTA)
+    bA1 = inversion(TTA,0)
+    bA3 = inversion(TTA,2)
 
-    bA1 = inversion(TT,0)
-    bA3 = inversion(TT,2)
+    print('Inversao bA1:',bA1)
+    print('Inversao bA3:',bA3)
+
+    print('Depois:',TTA)
+    
     #1.3
-    dA = encryptionOutCol(TT,2,3)
+    #dA = encryptionOutCol(TT,2,3)
     
     #1.4 Commit
     # Falta....
@@ -77,33 +95,60 @@ def main():
     #
 
     lida = smc.getTTA.call({'from': accounts[1]})
-    print(lida)
+    print('TT Recebida por B',lida)
 
     
     (TTB,shuffleB) = shuffle(lida) #4.1
 
-    print(TTB)
+    print('shuffle de B:',TTB)
     # 4.2
-    dB = encryptionOutCol(TTB,2,4)
+    #dB = encryptionOutCol(TTB,2,4)
     bB2 = inversion(TTB,1) 
-    bB3 = inversion(TTB,2) 
+    bB3 = inversion(TTB,2)
+    
+    print('Inversao bB2:',bB2)
+    print('Inversao bB3:',bB3)
 
+    print(TTB)
     
     # envia
-    smc.receivesTableFromB(linear(TTB),{'from': accounts[1]})
-
-    
+    smc.receiveTableFromB(TTB,{'from': accounts[1]})
 
     # A pega a tabela modificada de B
+    lidaA = smc.getTTB.call({'from': accounts[0]})
+
 
     # A escolhe as linhas
-
-    # B escolhe as linhas
-
-    # A envia as inversoes
-
-    # B envia as inversoes
-
-    # contrato calcula... e FIM!
+    linhasA=[0,0]
+    idx=0
+    for i in range(len(lidaA)):
+        if (lidaA[i][1] ^ bA1) == escolhaA:
+            linhasA[idx]=i
+            idx+=1
+    smc.receiveLinesFromA(linhasA[0],linhasA[1],{'from': accounts[0]})
 
     
+    # B escolhe as linhas
+    linhasB=[0,0]
+    idx=0
+    for i in range(len(TTB)):
+        if (TTB[i][1] ^ bB2) == escolhaB:
+            linhasB[idx]=i
+            idx+=1
+
+    print('Linhas de B:',linhasB)
+    smc.receiveLinesFromB(linhasB[0],linhasB[1],{'from': accounts[0]})
+
+    # A envia as inversoes
+    smc.receiveInversionFromA(bA3,{'from': accounts[0]})
+    # B envia as inversoes
+    smc.receiveInversionFromB(bB3,{'from': accounts[1]})
+    
+    # contrato calcula... e FIM!
+    ra = smc.getValue.call({'from': accounts[0]})
+    rb = smc.getValue.call({'from': accounts[1]})
+
+   
+
+    print ('SAIDA:',ra == f(escolhaA,escolhaB))
+
