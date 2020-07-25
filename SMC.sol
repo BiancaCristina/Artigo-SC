@@ -3,11 +3,15 @@ pragma solidity >=0.4.25 <0.6.0;
 contract SMC {
   enum StatesSMC { State1}
 
-  // por algum motivo da erro quando uso [4][3]...
-  // https://github.com/ethereum/solidity/issues/8364
   bool[3][4] TruthTable;
   bool[3][4] TruthTableA;
   bool[3][4] TruthTableB;
+  uint LA1;
+  uint LA2;
+  uint LB1;
+  uint LB2;
+  bool invA;
+  bool invB;
 
   StatesSMC myState;
     
@@ -22,32 +26,59 @@ contract SMC {
     }  
   }
 
-  function receivesTableFromB(bool[12] memory _tt) public {
-	  for (uint i=0; i<4; i++) {
-		  for(uint j=0; j<3;j++) {
-			  TruthTableB[i][j] = _tt[i*3+j]
-		  }
-	  }
+
+  function receiveTableFromB(bool[3][4] memory _tt) public {
+   for (uint i=0;i<4;i++) {
+       for (uint j=0;j<3;j++) {
+	   TruthTableB[i][j]  = _tt[i][j];
+       }
+    }  
   }
 
-  function receivesLinesFromA(uint l1, uint l2) public {
-  //apenas guarda os valores recebidos
+  function receiveLinesFromA(uint l1, uint l2) public {
+  	   LA1=l1;
+	   LA2=l2;
   }
 
-  function receivesLinesFromB(uint l1, uint l2) public {
+  function receiveLinesFromB(uint l1, uint l2) public {
+  	   LB1=l1;
+	   LB2=l2;
   }
 
-  function receivesInversionFromA() public {
+  function receiveInversionFromA(bool inv) public {
+  	   invA=inv;
   }
 
-  function receivesInversionFromB() public {
+  function receiveInversionFromB(bool inv) public {
+  	   invB=inv;
   }
+
+
+  function getLine() public returns (uint) {
+           uint linha;
+	   bool r;
+  	   if ((LA1==LB1) || (LA1==LB2)) {
+	      linha=LA1;
+	   }
+	   if ((LA2==LB1) || (LA2==LB2)) {
+	      linha=LA2;
+	   }
+	   return linha;
+  }
+
 
 
   function getValue() public returns (bool) {
-  // juntas as linhas de A e B
-  // aplica as inversoes
-  // e retorna
+  	   uint linha;
+	   bool r;
+  	   if ((LA1==LB1) || (LA1==LB2)) {
+	      linha=LA1;
+	   }
+	   if ((LA2==LB1) || (LA2==LB2)) {
+	      linha=LA2;
+	   }
+	   r = TruthTableB[linha][2];
+	   return (r != invA) != invB;
   }
   
 
@@ -56,6 +87,12 @@ contract SMC {
 	   return TruthTableA;
   }
 
+  //get TT uploaded by B
+  function getTTB() public returns (bool[3][4] memory) {
+	   return TruthTableB;
+  }
+
   
   
 }
+
