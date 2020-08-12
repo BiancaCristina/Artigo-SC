@@ -44,8 +44,8 @@ brownie console --network private
 ```
 
 Feito isso, para executar o contrato, basta:
-```
-run(execution)
+```python
+run('execution')
 ```
 
 
